@@ -515,9 +515,6 @@ necessary."
 		(local-set-key (if rails-use-another-define-key
                                  (kbd "TAB") (kbd "<tab>"))
 			       'indent-and-complete))
-              (local-set-key (rails-key "f") '(lambda()
-                                                (interactive)
-                                                (mouse-major-mode-menu (rails-core:menu-position))))
               (local-set-key (kbd "C-:") 'ruby-toggle-string<>simbol)
               (local-set-key (if rails-use-another-define-key
                                (kbd "RET") (kbd "<return>"))
@@ -538,6 +535,11 @@ necessary."
 				  'indent-and-complete))
                (rails-minor-mode t)
                (rails-apply-for-buffer-type)))))
+
+(define-key rails-minor-mode-map
+  (rails-key "f") '(lambda()
+                     (interactive)
+                     (mouse-major-mode-menu (rails-core:menu-position))))
 
 ;; Run rails-minor-mode in dired
 
