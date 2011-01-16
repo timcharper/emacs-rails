@@ -29,6 +29,16 @@
 ;; setup align for ruby-mode
 (require 'align)
 
+(defcustom rails-indent-and-complete t
+  "Key to indent and complete."
+  :group 'rails
+  :type 'boolean)
+
+(defcustom rails-enable-ruby-electric t
+  "Indicates whether ruby electric minor mode should be enabled by default for ruby files"
+  :group 'rails
+  :type 'boolean)
+
 (defconst align-ruby-modes '(ruby-mode)
   "align-perl-modes is a variable defined in `align.el'.")
 
@@ -208,5 +218,41 @@ See the variable `align-rules-list' for more details.")
                (cmd (if maxnum (concat cmd (format "[0...%s]" maxnum)) cmd)))
           (el4r-ruby-eval (format cmd (word-at-point) prefix prefix)))))))
 
+(defun backward-ruby-object ()
+  (if (looking-back "[-a-zA-Z_#:*]+" (line-beginning-position) t)
+      (goto-char (match-beginning 0))))
+
+(defun forward-ruby-object (n)
+  (if (> 0 n)
+      (when (search-backward-regexp "[^-a-zA-Z_#:*][-a-zA-Z_#:*]+" nil t (- n))
+	(forward-char)
+	(point))
+      (when (search-forward-regexp "[-a-zA-Z_#:*]+" nil t n)
+	(goto-char (match-end 0)))))
+
+(add-hook 'ruby-mode-hook
+          (lambda ()
+            (when (rails-project:root)
+              (require 'rails-ruby)
+              (require 'ruby-electric)
+              (ruby-electric-mode (or rails-enable-ruby-electric -1))
+              (ruby-hs-minor-mode t)
+              (imenu-add-to-menubar "IMENU")
+              (if rails-indent-and-complete
+                  (local-set-key (if rails-use-another-define-key
+                                     (kbd "TAB") (kbd "<tab>"))
+                                 'indent-and-complete))
+              (local-set-key (kbd "C-:") 'ruby-toggle-string<>simbol)
+              (local-set-key (if rails-use-another-define-key
+                                 (kbd "RET") (kbd "<return>"))
+                             'ruby-newline-and-indent))))
+
+
+
+(add-hook 'find-file-hooks
+          (if rails-indent-and-complete
+              (local-set-key (if rails-use-another-define-key
+                                 (kbd "TAB") (kbd "<tab>"))
+                             'indent-and-complete)))
 
 (provide 'rails-ruby)

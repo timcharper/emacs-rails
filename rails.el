@@ -63,7 +63,6 @@
 ;;;;;;;;; Loading most of the mode
 
 (require 'rails-core)
-(require 'rails-ruby)
 (require 'rails-lib)
 
 (require 'rails-cmd-proxy)
@@ -158,11 +157,6 @@ Emacs w3m browser."
   :group 'rails
   :type 'string)
 
-(defcustom rails-enable-ruby-electric t
-  "Indicates whether ruby electric minor mode should be enabled by default for ruby files"
-  :group 'rails
-  :type 'boolean)
-
 (defcustom rails-number-of-lines-shown-when-opening-log-file 130
   "Specifies how many lines to show initially when opening a log file"
   :group 'rails
@@ -173,11 +167,6 @@ Emacs w3m browser."
 (defvar rails-primary-switch-func nil)
 (defvar rails-secondary-switch-func nil)
 (defvar rails-required-lisp-eval-depth 1000) ; Specifies the minimum required value of max-lisp-eval-depth for rails mode to work
-
-(defcustom rails-indent-and-complete t
-  "Key to indent and complete."
-  :group 'rails
-  :type 'boolean)
 
 (defvar rails-directory<-->types
   '((:controller       "app/controllers/")
@@ -274,18 +263,6 @@ Emacs w3m browser."
                                   (rails-svn-status-into-root)))))
 
 ;; helper functions/macros
-
-(defun backward-ruby-object ()
-  (if (looking-back "[-a-zA-Z_#:*]+" (line-beginning-position) t)
-      (goto-char (match-beginning 0))))
-
-(defun forward-ruby-object (n)
-  (if (> 0 n)
-      (when (search-backward-regexp "[^-a-zA-Z_#:*][-a-zA-Z_#:*]+" nil t (- n))
-	(forward-char)
-	(point))
-      (when (search-forward-regexp "[-a-zA-Z_#:*]+" nil t n)
-	(goto-char (match-end 0)))))
 
 (defun rails-search-doc (&optional item)
   (interactive)
@@ -503,23 +480,6 @@ necessary."
 
 ;; hooks
 
-(add-hook 'ruby-mode-hook
-          (lambda ()
-            (when (rails-project:root)
-              (require 'rails-ruby)
-              (require 'ruby-electric)
-              (ruby-electric-mode (or rails-enable-ruby-electric -1))
-              (ruby-hs-minor-mode t)
-              (imenu-add-to-menubar "IMENU")
-              (if rails-indent-and-complete
-		(local-set-key (if rails-use-another-define-key
-                                 (kbd "TAB") (kbd "<tab>"))
-			       'indent-and-complete))
-              (local-set-key (kbd "C-:") 'ruby-toggle-string<>simbol)
-              (local-set-key (if rails-use-another-define-key
-                               (kbd "RET") (kbd "<return>"))
-                             'ruby-newline-and-indent))))
-
 (add-hook 'speedbar-mode-hook
           (lambda()
             (speedbar-add-supported-extension "\\.rb")))
@@ -529,10 +489,6 @@ necessary."
             (rails-project:with-root
              (root)
              (progn
-	       (if rails-indent-and-complete
-		   (local-set-key (if rails-use-another-define-key
-				      (kbd "TAB") (kbd "<tab>"))
-				  'indent-and-complete))
                (rails-minor-mode t)
                (rails-apply-for-buffer-type)))))
 
